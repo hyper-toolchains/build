@@ -367,6 +367,7 @@ endif
 .PHONY: config-target-gcc build-target-gcc install-target-gcc
 .PHONY: install-target-gcc-gcc $(install-target-gcc-multilibs)
 config-target-gcc: stmp-config-target-gcc
+stmp-config-target-gcc: stmp-install-host-gmp stmp-install-host-mpfr stmp-install-host-mpc
 
 GCC_CONFIG_ARGS=--prefix=$(prefix) \
 	  --target=${cur_target} --host=${cur_host} --build=${cur_build} \
