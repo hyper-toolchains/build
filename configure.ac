@@ -197,6 +197,16 @@ done
 
 AC_SUBST(host_baseargs)
 
+ENABLE_CLOOG=no
+AC_ARG_ENABLE([cloog],
+              AC_HELP_STRING([--enable-cloog],
+                             [Enable CLooG (for GCC 4.9 and lower) @<:@default=no@:>@]))
+if test x${enableval} != xno; then
+  cloog=yes
+fi
+ENABLE_CLOOG=$cloog
+AC_SUBST(ENABLE_CLOOG)
+
 ENABLE_GRAPHITE=no
 AC_ARG_ENABLE([graphite],
               AC_HELP_STRING([--enable-graphite],
@@ -303,7 +313,6 @@ AC_MSG_RESULT($GCC_VERSION)
 AC_SUBST(GCC_VERSION)
 ANDROID_CHECK_PACKAGE(gcc-${GCC_VERSION})
 
-
 # newlib version (default is uber)
 # newlib is only used for arm-newlib-eabi for testing
 if test x$target == xarm-newlib-elf ; then 
@@ -360,6 +369,7 @@ AC_MSG_RESULT($MPC_VERSION)
 ANDROID_CHECK_PACKAGE(mpc-${MPC_VERSION})
 AC_SUBST(MPC_VERSION)
 
+if test "$ENABLE_CLOOG" == "yes"; then
 if test "$ENABLE_GRAPHITE" == "yes"; then
 AC_MSG_CHECKING([cloog version])
 AC_ARG_WITH([cloog-version],
@@ -373,6 +383,7 @@ AC_MSG_RESULT($CLOOG_VERSION)
 CLOOG_BACKEND="--enable-cloog-backend=isl"
 AC_SUBST(CLOOG_BACKEND)
 ANDROID_CHECK_PACKAGE(cloog-${CLOOG_VERSION})
+fi
 fi
 AC_SUBST(CLOOG_VERSION)
 
