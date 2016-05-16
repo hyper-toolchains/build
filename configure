@@ -602,6 +602,7 @@ GOLD_VERSION
 BINUTILS_VERSION
 package_to_srcdir
 ENABLE_GRAPHITE
+ENABLE_CLOOG
 host_baseargs
 enable_ld_default
 enable_gold
@@ -663,6 +664,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_cloog
 enable_graphite
 with_binutils_version
 with_gold_version
@@ -1298,6 +1300,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-cloog          Enable CLooG (for GCC 4.9 and lower) [default=no]
   --enable-graphite       Enable Graphite optimization [default=yes]
 
 Optional Packages:
@@ -2181,6 +2184,18 @@ done
 
 
 
+ENABLE_CLOOG=no
+# Check whether --enable-cloog was given.
+if test "${enable_cloog+set}" = set; then :
+  enableval=$enable_cloog;
+fi
+
+if test x${enableval} != xno; then
+  cloog=yes
+fi
+ENABLE_CLOOG=$cloog
+
+
 ENABLE_GRAPHITE=no
 # Check whether --enable-graphite was given.
 if test "${enable_graphite+set}" = set; then :
@@ -2359,7 +2374,6 @@ if test \( ! -d $srcdir/../$tool/gcc-${GCC_VERSION} \) -a \( x"$version" != x"no
     as_fn_error $? "'package gcc-${GCC_VERSION} does not exist.'" "$LINENO" 5
   fi
 fi
-
 
 # newlib version (default is uber)
 # newlib is only used for arm-newlib-eabi for testing
@@ -2553,6 +2567,7 @@ if test \( ! -d $srcdir/../$tool/mpc-${MPC_VERSION} \) -a \( x"$version" != x"no
 fi
 
 
+if test "$ENABLE_CLOOG" == "yes"; then
 if test "$ENABLE_GRAPHITE" == "yes"; then
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking cloog version" >&5
 $as_echo_n "checking cloog version... " >&6; }
@@ -2599,6 +2614,7 @@ if test \( ! -d $srcdir/../$tool/cloog-${CLOOG_VERSION} \) -a \( x"$version" != 
   else
     as_fn_error $? "'package cloog-${CLOOG_VERSION} does not exist.'" "$LINENO" 5
   fi
+fi
 fi
 fi
 
