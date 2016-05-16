@@ -432,7 +432,7 @@ GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
-if ($(ENABLE_CLOOG),yes)
+ifeq ($(ENABLE_CLOOG),yes)
 stmp-config-target-gcc: config.status stmp-install-host-isl stmp-install-host-cloog stmp-build-target-binutils
 	([ -d ${GCC_VERSION} ] || \
 	  mkdir ${GCC_VERSION}) && \
