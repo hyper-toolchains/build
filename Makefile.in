@@ -291,21 +291,17 @@ config-target-binutils: stmp-config-target-binutils
 # We do not want to enable shared libraries in binutils
 BINUTILS_CONFIG_ARGS=--prefix=$(prefix) \
 	--target=${cur_target} --host=${cur_host} --build=${cur_build} \
-	$(baseargs) --disable-shared --disable-nls --disable-werror
+	$(baseargs) --disable-shared --disable-nls --disable-werror \
+	--with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
+	--disable-ppl-version-check --disable-cloog-version-check \
+	--disable-isl-version-check '--with-host-libstdcxx=-static-libgcc \
+	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+	--with-gold-ldflags='-static-libgcc -static-libstdc++' \
+        --enable-install-libbfd
 ifeq ($(ENABLE_GRAPHITE),yes)
 ifeq ($(ENABLE_CLOOG),yes)
- BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
- 	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
-else
-BINUTILS_CONFIG_ARGS+= --with-isl=${ISL_DIR} --with-gmp=${GMP_DIR} \
-	--disable-ppl-version-check --disable-cloog-version-check --disable-isl-version-check
+ BINUTILS_CONFIG_ARGS+= --with-cloog=${CLOOG_DIR} $(CLOOG_BACKEND)
 endif
-# links to the static C++ runtime to avoid depending on the host version
-BINUTILS_CONFIG_ARGS+= \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
-	 --with-gold-ldflags='-static-libgcc -static-libstdc++' \
-         --enable-install-libbfd
 endif
 # Enable dual linker support and make gold as default linker when gold is
 # enabled. Notice that our binutils take different --enable-gold=xxx options.
@@ -374,32 +370,26 @@ GCC_CONFIG_ARGS=--prefix=$(prefix) \
 	  --with-gnu-as --with-gnu-ld --enable-languages=c,c++,lto \
 	  --with-gmp=$(GMP_DIR) --with-mpfr=$(MPFR_DIR) \
 	  --with-mpc=$(MPC_DIR) --enable-bionic-libs \
-	  --enable-lto
+	  --enable-lto --with-isl=${ISL_DIR} \
+  	  --disable-cloog-version-check --disable-isl-version-check \
+  	 '--with-host-libstdcxx=-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' \
+  	  --enable-version-specific-runtime-libs \
+   	  --enable-threads --disable-nls --enable-target-optspace \
+	  --disable-shared --disable-tls --disable-libitm \
+	  --disable-werror --disable-libssp  --disable-plugin \
+	  --disable-sjlj-exceptions --disable-host-shared $(ENABLE_GOLD) \
+	  $(baseargs)
+	  
 
-# For gcc 4.8+ with graphite optimization, cloog and isl are required.
+# For gcc 4.8-4.9 with graphite optimization, cloog and isl are required.
 ifeq ($(ENABLE_GRAPHITE),yes)
 ifeq ($(ENABLE_CLOOG),yes)
-GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR} --with-isl=${ISL_DIR} \
-	--disable-cloog-version-check --disable-isl-version-check $(CLOOG_BACKEND)
-else
-GCC_CONFIG_ARGS += --with-isl=${ISL_DIR} \
-	--disable-cloog-version-check --disable-isl-version-check
+GCC_CONFIG_ARGS += --with-cloog=${CLOOG_DIR}
 endif
-# links to the static C++ runtime to avoid depending on the host version
-GCC_CONFIG_ARGS += \
-	'--with-host-libstdcxx=-static-libgcc \
-	 -Wl,-Bstatic,-lstdc++,-Bdynamic -lm'
 else
 # Disable isl and cloog just in case the host have them install.
 GCC_CONFIG_ARGS += --without-cloog --without-isl
 endif
-
-# The following are General GCC configuration options for all targets
-GCC_CONFIG_ARGS += --enable-version-specific-runtime-libs \
-	--enable-threads --disable-nls --enable-target-optspace \
-	--disable-shared --disable-tls --disable-libitm \
-	--disable-werror --disable-libssp  --disable-plugin \
-	--disable-sjlj-exceptions --disable-host-shared
 
 ifneq ($(target_os),x86_64)
 GCC_CONFIG_ARGS += --disable-libstdc__-v3 --enable-eh-frame-hdr-for-static
@@ -423,14 +413,6 @@ GCC_CONFIG_ARGS += --with-float=soft --with-fpu=vfp
 ifneq ($(target_os),linux-androideabi)
 GCC_CONFIG_ARGS += --with-abi=aapcs
 endif
-endif
-
-# We add the baseargs and the end so that they override any default args
-GCC_CONFIG_ARGS += $(baseargs)
-
-# Add user specified --enable-gold=xxx option to gcc
-ifneq ($(ENABLE_GOLD),)
-GCC_CONFIG_ARGS += $(ENABLE_GOLD)
 endif
 
 # We have to add -mandroid in target CFLAGS and CXXFLAGS
